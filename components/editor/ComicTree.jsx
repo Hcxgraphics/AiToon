@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { ChevronRight, ChevronDown, Plus, FileText, MoreHorizontal, Check, Loader2, AlertTriangle } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, FileText, MoveHorizontal as MoreHorizontal, Check, Loader as Loader2, TriangleAlert as AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const statusIcon = (status) => {
