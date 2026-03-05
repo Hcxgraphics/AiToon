@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LeftPanel } from "./LeftPanel";
 import { CenterCanvas } from "./CenterCanvas";
-import { RightInspector } from "./RightInspector";
+import { ChatPanel } from "./ChatPanel";
 
 export type PanelData = {
   id: string;
@@ -22,6 +22,13 @@ export type PageData = {
   id: string;
   name: string;
   panels: PanelData[];
+};
+
+export type GridLayout = {
+  id: string;
+  name: string;
+  rows: number[];
+  cols: number[];
 };
 
 export const EditorLayout = () => {
@@ -107,13 +114,17 @@ export const EditorLayout = () => {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
+      {/* LEFT: Inspector + Pages + Cast */}
       <div className="w-[25%] min-w-[280px] max-w-[360px] border-r border-border flex flex-col">
         <LeftPanel
           pages={pages}
+          selectedPanel={selectedPanel}
           selectedPanelId={selectedPanelId}
           onSelectPanel={setSelectedPanelId}
         />
       </div>
+
+      {/* CENTER: Canvas */}
       <div className="flex-1 flex flex-col min-w-0">
         <CenterCanvas
           pages={pages}
@@ -121,8 +132,10 @@ export const EditorLayout = () => {
           onSelectPanel={setSelectedPanelId}
         />
       </div>
+
+      {/* RIGHT: Chat */}
       <div className="w-[25%] min-w-[280px] max-w-[360px] border-l border-border flex flex-col">
-        <RightInspector panel={selectedPanel} />
+        <ChatPanel allVersions={allPanels.flatMap((p) => (p.versions || []).map((v) => ({ ...v, panelName: p.name })))} />
       </div>
     </div>
   );

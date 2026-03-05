@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, RotateCcw, Sparkles } from "lucide-react";
+import { Send, RotateCcw, Sparkles, History, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SUGGESTED_PROMPTS = [
@@ -13,20 +13,23 @@ const CONTEXT_CHIPS = ["+Hero", "+Villain", "+Panel 2", "+Night scene"];
 
 type Message = { role: "user" | "assistant"; content: string };
 
-export const ChatEditor = () => {
+interface ChatPanelProps {
+  allVersions: { id: string; label: string; timestamp: string; panelName: string }[];
+}
+
+export const ChatPanel = ({ allVersions }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Welcome to your comic studio! I can help you create scenes, write dialogue, and design panels. What would you like to work on?" },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const sendMessage = () => {
     if (!input.trim()) return;
-    const userMsg: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
     setIsTyping(true);
-
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -41,7 +44,19 @@ export const ChatEditor = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-card relative">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Chat</span>
+        <button
+          onClick={() => setShowHistory(true)}
+          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
+          title="Version History"
+        >
+          <History size={15} />
+        </button>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
         <AnimatePresence>
@@ -53,13 +68,11 @@ export const ChatEditor = () => {
               transition={{ duration: 0.2 }}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div
-                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                }`}
-              >
+              <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground"
+              }`}>
                 {msg.content}
               </div>
             </motion.div>
@@ -79,8 +92,8 @@ export const ChatEditor = () => {
         )}
       </div>
 
-      {/* Suggested prompts */}
-      <div className="px-3 pb-2">
+      {/* Bottom: Suggestions, chips, input */}
+      <div className="px-3 pb-2 flex-shrink-0">
         <div className="flex flex-wrap gap-1.5 mb-2">
           {SUGGESTED_PROMPTS.map((prompt) => (
             <button
@@ -88,13 +101,11 @@ export const ChatEditor = () => {
               onClick={() => setInput(prompt)}
               className="text-[10px] px-2 py-1 rounded-md bg-secondary text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
             >
-              <Sparkles size={10} className="inline mr-1" />
-              {prompt}
+              <Sparkles size={10} className="inline mr-1" /> {prompt}
             </button>
           ))}
         </div>
 
-        {/* Context chips */}
         <div className="flex flex-wrap gap-1 mb-2">
           {CONTEXT_CHIPS.map((chip) => (
             <button
@@ -107,7 +118,6 @@ export const ChatEditor = () => {
           ))}
         </div>
 
-        {/* Input */}
         <div className="flex items-center gap-2 bg-secondary rounded-lg p-1.5">
           <input
             value={input}
@@ -132,6 +142,41 @@ export const ChatEditor = () => {
           </button>
         </div>
       </div>
+
+      {/* Version History Modal */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-sm font-semibold text-foreground">Version History</span>
+              <button onClick={() => setShowHistory(false)} className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+              {allVersions.length > 0 ? allVersions.map((v) => (
+                <div key={`${v.panelName}-${v.id}`} className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary text-sm">
+                  <div>
+                    <span className="text-foreground">{v.label}</span>
+                    <span className="text-[10px] text-muted-foreground ml-2">({v.panelName})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground">{v.timestamp}</span>
+                    <button className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors">Revert</button>
+                  </div>
+                </div>
+              )) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No versions yet</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

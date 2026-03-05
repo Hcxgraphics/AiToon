@@ -1,10 +1,11 @@
 import { useState } from "react";
 import {
   ZoomIn, ZoomOut, MessageSquare, Grid3X3, ChevronLeft, ChevronRight,
-  Download, Pencil, RefreshCw, Trash2, Copy,
+  Download, Pencil, RefreshCw, Trash2, Copy, Camera,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { PageData } from "./EditorLayout";
+import { GridManager, type GridConfig } from "./GridManager";
 import comicPanel1 from "@/assets/comic-panel-1.jpg";
 import comicPanel2 from "@/assets/comic-panel-2.jpg";
 import comicPanel3 from "@/assets/comic-panel-3.jpg";
@@ -26,13 +27,14 @@ interface CenterCanvasProps {
 export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCanvasProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [showBubbles, setShowBubbles] = useState(true);
-  const [showGrid, setShowGrid] = useState(false);
+  const [showGridManager, setShowGridManager] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [gridConfig, setGridConfig] = useState<GridConfig>({ rows: 2, cols: 2, preset: "2x2" });
 
   const currentPage = pages[currentPageIndex];
 
   return (
-    <div className="flex flex-col h-full bg-canvas">
+    <div className="flex flex-col h-full bg-canvas relative">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="flex items-center gap-1">
@@ -47,7 +49,7 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
           <button onClick={() => setShowBubbles(!showBubbles)} className={`p-1.5 rounded-md transition-colors ${showBubbles ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"}`}>
             <MessageSquare size={16} />
           </button>
-          <button onClick={() => setShowGrid(!showGrid)} className={`p-1.5 rounded-md transition-colors ${showGrid ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"}`}>
+          <button onClick={() => setShowGridManager(!showGridManager)} className={`p-1.5 rounded-md transition-colors ${showGridManager ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"}`}>
             <Grid3X3 size={16} />
           </button>
         </div>
@@ -72,6 +74,14 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
         </div>
       </div>
 
+      {/* Grid Manager Popover */}
+      <GridManager
+        open={showGridManager}
+        onClose={() => setShowGridManager(false)}
+        config={gridConfig}
+        onChange={setGridConfig}
+      />
+
       {/* Canvas */}
       <div className="flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-8">
         <div
@@ -79,7 +89,8 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
           style={{
             transform: `scale(${zoom / 100})`,
             transformOrigin: "center center",
-            gridTemplateColumns: currentPage.panels.length <= 2 ? "1fr 1fr" : "1fr 1fr",
+            gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+            gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
             maxWidth: "700px",
             width: "100%",
           }}
@@ -96,11 +107,9 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
                 transition={{ delay: i * 0.05 }}
                 onClick={() => onSelectPanel(panel.id)}
                 className={`relative rounded-lg overflow-hidden cursor-pointer group transition-all duration-200 ${
-                  currentPage.panels.length === 3 && i === 2 ? "col-span-2" : ""
-                } ${
                   isSelected ? "ring-2 ring-primary glow-accent" : "ring-1 ring-border hover:ring-primary/40"
                 }`}
-                style={{ aspectRatio: currentPage.panels.length === 3 && i === 2 ? "2/1" : "4/3" }}
+                style={{ aspectRatio: gridConfig.cols === 1 ? "16/9" : "4/3" }}
               >
                 {img ? (
                   <img src={img} alt={panel.name} className="w-full h-full object-cover" />
@@ -110,12 +119,10 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
                   </div>
                 )}
 
-                {/* Generating overlay */}
                 {panel.status === "generating" && (
                   <div className="absolute inset-0 shimmer opacity-60" />
                 )}
 
-                {/* Speech bubble */}
                 {showBubbles && panel.dialogue && (
                   <div className="absolute bottom-3 left-3 right-3">
                     <div className={`rounded-lg px-3 py-2 text-xs max-w-[80%] ${
@@ -130,11 +137,13 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
                   </div>
                 )}
 
-                {/* Hover actions */}
+                {/* Hover actions — includes Change camera angle */}
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {[
                     { icon: <RefreshCw size={12} />, title: "Regenerate" },
+                    { icon: <MessageSquare size={12} />, title: "Edit dialogue" },
                     { icon: <Copy size={12} />, title: "Duplicate" },
+                    { icon: <Camera size={12} />, title: "Camera angle" },
                     { icon: <Trash2 size={12} />, title: "Delete" },
                   ].map((action) => (
                     <button
@@ -148,7 +157,6 @@ export const CenterCanvas = ({ pages, selectedPanelId, onSelectPanel }: CenterCa
                   ))}
                 </div>
 
-                {/* Panel label */}
                 <div className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-background/70 text-foreground backdrop-blur-sm">
                   {panel.name}
                 </div>
