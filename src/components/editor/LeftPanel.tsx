@@ -1,30 +1,30 @@
 import { useState } from "react";
-import { ChatEditor } from "./ChatEditor";
+import { PanelInspector } from "./PanelInspector";
 import { ComicTree } from "./ComicTree";
 import { CharacterLibrary } from "./CharacterLibrary";
-import { MessageSquare, FolderTree, Users } from "lucide-react";
-import type { PageData } from "./EditorLayout";
+import { Sliders, FolderTree, Users } from "lucide-react";
+import type { PageData, PanelData } from "./EditorLayout";
 
-type Tab = "chat" | "tree" | "characters";
+type Tab = "inspector" | "tree" | "characters";
 
 interface LeftPanelProps {
   pages: PageData[];
+  selectedPanel: PanelData | null;
   selectedPanelId: string | null;
   onSelectPanel: (id: string) => void;
 }
 
-export const LeftPanel = ({ pages, selectedPanelId, onSelectPanel }: LeftPanelProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>("chat");
+export const LeftPanel = ({ pages, selectedPanel, selectedPanelId, onSelectPanel }: LeftPanelProps) => {
+  const [activeTab, setActiveTab] = useState<Tab>("inspector");
 
   const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: "chat", icon: <MessageSquare size={16} />, label: "Chat" },
+    { id: "inspector", icon: <Sliders size={16} />, label: "Panel" },
     { id: "tree", icon: <FolderTree size={16} />, label: "Pages" },
     { id: "characters", icon: <Users size={16} />, label: "Cast" },
   ];
 
   return (
     <div className="flex flex-col h-full bg-card">
-      {/* Tab bar */}
       <div className="flex border-b border-border">
         {tabs.map((tab) => (
           <button
@@ -42,15 +42,10 @@ export const LeftPanel = ({ pages, selectedPanelId, onSelectPanel }: LeftPanelPr
         ))}
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === "chat" && <ChatEditor />}
+        {activeTab === "inspector" && <PanelInspector panel={selectedPanel} />}
         {activeTab === "tree" && (
-          <ComicTree
-            pages={pages}
-            selectedPanelId={selectedPanelId}
-            onSelectPanel={onSelectPanel}
-          />
+          <ComicTree pages={pages} selectedPanelId={selectedPanelId} onSelectPanel={onSelectPanel} />
         )}
         {activeTab === "characters" && <CharacterLibrary />}
       </div>
