@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PanelInspector } from "./PanelInspector";
 import { ComicTree } from "./ComicTree";
 import { CharacterLibrary } from "./CharacterLibrary";
-import { Sliders, FolderTree, Users } from "lucide-react";
+import { FileSliders as Sliders, FolderTree, Users } from "lucide-react";
 
 export const LeftPanel = ({ pages, selectedPanel, selectedPanelId, onSelectPanel }) => {
   const [activeTab, setActiveTab] = useState("inspector");

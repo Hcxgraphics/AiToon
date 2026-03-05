@@ -1,10 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import {
-  ZoomIn, ZoomOut, MessageSquare, Grid3X3, ChevronLeft, ChevronRight,
-  Download, Pencil, RefreshCw, Trash2, Copy, Camera,
-} from "lucide-react";
+import { ZoomIn, ZoomOut, MessageSquare, Grid3x3 as Grid3X3, ChevronLeft, ChevronRight, Download, Pencil, RefreshCw, Trash2, Copy, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import { GridManager } from "./GridManager";
 
