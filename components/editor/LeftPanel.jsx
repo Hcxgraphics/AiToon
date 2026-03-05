@@ -41,6 +41,10 @@ export const LeftPanel = ({ pages, selectedPanel, selectedPanelId, onSelectPanel
         )}
         {activeTab === "characters" && <CharacterLibrary />}
       </div>
+
+      <button className="mb-5 px-4 py-2 border text-primary border-b-2 border-primary text-black-500 bg-blue-500/10 m-4 hover:bg-blue-500/20 rounded-sm transition-colors">
+        Submit
+      </button>    
     </div>
   );
 };

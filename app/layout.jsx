@@ -9,7 +9,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
       <head>
-        <title>AI Comic Studio — Create Comics with AI</title>
+        <title>AiToon</title>
         <meta name="description" content="A professional AI-powered comic creation studio. Chat with AI, design panels, write dialogue, and build your story." />
         <meta property="og:title" content="AI Comic Studio" />
         <meta property="og:description" content="Create comics with AI assistance" />
