@@ -1,1 +1,17 @@
-{}
+{
+  "[project]/components/blocks/gallery-hero.jsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/components/blocks/gallery-hero.jsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/components_ui_3d-gallery-photography_jsx_f90365ac._.js",
+      "static/chunks/components_blocks_gallery-hero_jsx_f0890e10._.js",
+      "static/chunks/components_blocks_gallery-hero_jsx_b612b997._.js"
+    ]
+  },
+  "[project]/components/blocks/hero-spline.jsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/components/blocks/hero-spline.jsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/_9af4b7da._.js",
+      "static/chunks/components_blocks_hero-spline_jsx_b612b997._.js"
+    ]
+  }
+}
