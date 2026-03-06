@@ -1,7 +1,13 @@
 'use client';
 
-import { EditorLayout } from "@/components/editor/EditorLayout";
+import GalleryHero from "@/components/blocks/gallery-hero";
+import HeroSpline from "@/components/blocks/hero-spline";
 
 export default function Home() {
-  return <EditorLayout />;
+  return (
+    <main className="bg-background text-foreground scroll-smooth">
+      <GalleryHero />
+      <HeroSpline />
+    </main>
+  );
 }
