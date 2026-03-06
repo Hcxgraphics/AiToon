@@ -1,7 +1,14 @@
-'use client';
+import dynamic from "next/dynamic";
 
-import GalleryHero from "@/components/blocks/gallery-hero";
-import HeroSpline from "@/components/blocks/hero-spline";
+const GalleryHero = dynamic(
+  () => import("@/components/blocks/gallery-hero"),
+  { ssr: false }
+);
+
+const HeroSpline = dynamic(
+  () => import("@/components/blocks/hero-spline"),
+  { ssr: false }
+);
 
 export default function Home() {
   return (
