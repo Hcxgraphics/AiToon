@@ -1,4 +1,4 @@
-// File: C:\Users\VIDHI\Desktop\AiToon_final\AiToon\app\page.jsx
+// File: D:\AiToon_dev\AiToon\app\page.jsx
 import * as entry from '../../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

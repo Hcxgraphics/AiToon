@@ -3,44 +3,55 @@
 import { ArrowRight, Sparkles, BookOpen, Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Particles from "@/components/ui/Particles";
 
 export default function HeroSpline() {
   const router = useRouter();
 
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center bg-background overflow-hidden">
-      {/* Animated background effects */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/10 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-accent/10 blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[150px]" />
+    <section className="relative min-h-screen overflow-hidden flex items-center justify-center">
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/gallery/hero_spline_image.jpg')" }}
+      />
+      <div className="absolute inset-0 z-10 bg-black/30" />
+      {/* <div className="absolute inset-0 z-20"> */}
+      <div className="absolute inset-0 z-20 pointer-events-none">
+        <Particles
+          particleCount={300}
+          particleSpread={10}
+          speed={0.1}
+          moveParticlesOnHover
+          alphaParticles
+          className="absolute inset-0"
+        />
       </div>
 
-      {/* Grid pattern */}
-      <div className="absolute inset-0 z-0 opacity-[0.03]"
-           style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl mx-auto">
-        {/* Badge */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm mb-8">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-muted-foreground">Powered by AI</span>
-        </div>
+      <div className="relative z-30 flex flex-col items-center text-center px-6 max-w-4xl mx-auto">
 
-        <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+      {/* Badge */}
+      <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-border/20 bg-card/10 backdrop-blur-sm mb-8">
+        <Sparkles className="w-4 h-4 text-primary" />
+        <span className="text-sm text-gray-400">Powered by AI</span>
+      </div>
+
+      {/* Glass Panel ONLY for main hero text */}
+      <div className="px-6 py-8 max-w-xl rounded-2xl bg-gradient-to-b from-black/10 via-blue-975/20 to-black/20 backdrop-blur-md border border-white/10 shadow-2xl">
+
+        <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1] drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
           Create Comics
           <br />
           <span className="text-primary">With AI</span>
         </h2>
 
-        <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+        <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed">
           Turn your ideas into stunning Manga, Manhua, and Anime style comics instantly.
-          Write, design, and publish — all in one studio.
+          Write, design, and publish ... all in one studio
         </p>
 
         {/* CTA */}
-        <div className="mt-10 flex flex-col sm:flex-row gap-4">
+        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"
             className="text-base px-8 py-6 rounded-xl gap-2"
@@ -49,6 +60,7 @@ export default function HeroSpline() {
             Get Started
             <ArrowRight className="w-5 h-5" />
           </Button>
+
           <Button
             variant="outline"
             size="lg"
@@ -59,20 +71,23 @@ export default function HeroSpline() {
           </Button>
         </div>
 
-        {/* Feature pills */}
-        <div className="mt-16 flex flex-wrap justify-center gap-3">
-          {[
-            { icon: Sparkles, label: "AI Generation" },
-            { icon: Palette, label: "Manga Styles" },
-            { icon: BookOpen, label: "Story Builder" },
-          ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card/30 border border-border/30 backdrop-blur-sm">
-              <Icon className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">{label}</span>
-            </div>
-          ))}
-        </div>
       </div>
-    </section>
+
+      {/* Feature pills */}
+      <div className="mt-16 flex flex-wrap justify-center gap-3">
+        {[
+          { icon: Sparkles, label: "AI Generation" },
+          { icon: Palette, label: "Manga Styles" },
+          { icon: BookOpen, label: "Story Builder" },
+        ].map(({ icon: Icon, label }) => (
+          <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card/30 border border-border/30 backdrop-blur-sm">
+            <Icon className="w-4 h-4 text-primary" />
+            <span className="text-sm text-gray-400">{label}</span>
+          </div>
+        ))}
+      </div>
+
+    </div>
+      </section>
   );
 }
