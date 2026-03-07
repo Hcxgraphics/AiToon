@@ -1589,9 +1589,6 @@ body{
 .opacity-\[0\.03\]{
   opacity: 0.03;
 }
-.mix-blend-exclusion{
-  mix-blend-mode: exclusion;
-}
 .shadow-2xl{
   --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
