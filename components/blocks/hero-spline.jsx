@@ -8,7 +8,7 @@ export default function HeroSpline() {
   const router = useRouter();
 
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center bg-background overflow-hidden">
+    <section className="relative w-full min-h-screen flex items-center justify-center bg-background overflow-hidden" data-section="hero-spline">
       {/* Animated background effects */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/10 blur-[120px] animate-pulse" />
