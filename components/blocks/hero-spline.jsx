@@ -44,7 +44,7 @@ export default function HeroSpline() {
           <Button
             size="lg"
             className="text-base px-8 py-6 rounded-xl gap-2"
-            onClick={() => router.push("/editor")}
+            onClick={() => router.push("/setup")}
           >
             Get Started
             <ArrowRight className="w-5 h-5" />
