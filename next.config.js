@@ -4,11 +4,6 @@ const nextConfig = {
   images: {
     domains: [],
   },
-  serverExternalPackages: [
-    'three',
-    '@react-three/fiber',
-    '@react-three/drei',
-  ],
 }
 
 export default nextConfig;
