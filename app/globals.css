@@ -118,4 +118,44 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(222 14% 28%);
   }
+
+  /* Mouse scroll button animation */
+  .mouse-btn {
+    margin: 10px auto;
+    width: 40px;
+    height: 80px;
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    border-radius: 40px;
+    display: flex;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  .mouse-btn:hover {
+    border-color: rgba(255, 255, 255, 1);
+  }
+
+  .mouse-scroll {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    margin: auto;
+    animation: scrolling13 1.5s linear infinite;
+  }
+
+  @keyframes scrolling13 {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
 }

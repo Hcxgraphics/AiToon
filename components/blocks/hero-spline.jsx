@@ -53,6 +53,15 @@ export default function HeroSpline() {
         {/* CTA */}
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <Button
+            variant="outline"
+            size="lg"
+            className="text-base px-8 py-6 rounded-xl gap-2"
+          >
+            <BookOpen className="w-5 h-5" />
+            View Gallery
+          </Button>
+          
+          <Button
             size="lg"
             className="text-base px-8 py-6 rounded-xl gap-2"
             onClick={() => router.push("/setup")}
@@ -61,14 +70,6 @@ export default function HeroSpline() {
             <ArrowRight className="w-5 h-5" />
           </Button>
 
-          <Button
-            variant="outline"
-            size="lg"
-            className="text-base px-8 py-6 rounded-xl gap-2"
-          >
-            <BookOpen className="w-5 h-5" />
-            View Gallery
-          </Button>
         </div>
 
       </div>

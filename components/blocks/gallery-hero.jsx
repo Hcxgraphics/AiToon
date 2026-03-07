@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import InfiniteGallery from "@/components/ui/InfiniteGallery";
 
 const images = [
@@ -14,6 +15,17 @@ const images = [
 ];
 
 export default function GalleryHero() {
+  const nextSectionRef = useRef(null);
+
+  const handleScrollClick = () => {
+    const nextSection = document.querySelector('[data-section="hero-spline"]');
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
+    }
+  };
+
   return (
     <section className="relative w-full h-screen overflow-hidden bg-background">
       {/* 3D Gallery with Scroll Animation */}
@@ -39,9 +51,8 @@ export default function GalleryHero() {
       <div className="absolute inset-0 z-10 bg-gradient-to-r from-background/40 via-transparent to-background/40 pointer-events-none" />
 
       {/* Title */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none mix-blend-exclusion text-white">
-        <h1 className="text-7xl md:text-9xl font-bold tracking-tighter drop-shadow-2xl"
-            style={{ textShadow: "0 0 60px hsl(var(--primary) / 0.4)" }}>
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none text-white">
+        <h1 className="text-7xl md:text-9xl font-bold tracking-tighter drop-shadow-2xl">
           AiToon
         </h1>
         <p className="mt-4 text-lg md:text-xl max-w-md text-center">
@@ -49,12 +60,21 @@ export default function GalleryHero() {
         </p>
       </div>
 
-      {/* Instructions */}
-      <div className="absolute bottom-10 left-0 right-0 z-20 text-center font-mono uppercase text-[11px] font-semibold text-foreground/70 pointer-events-none">
-        <p>Use mouse wheel, arrow keys, or touch to navigate</p>
-        <p className="opacity-60 mt-1">
-          Auto-play resumes after 3 seconds of inactivity
-        </p>
+     
+
+      {/* Mouse Scroll Button */}
+      <div className="absolute mb-10 bottom-0 left-0 right-0 z-20 flex justify-center pointer-events-auto">
+        <button
+          onClick={handleScrollClick}
+          className="mouse-btn"
+          aria-label="Scroll to next section"
+        >
+          <div className="mouse-scroll" />
+        </button>
+
+      {/* <div className="absolute bottom-20 left-0 right-0 z-20 text-center font-mono uppercase text-[11px] font-semibold text-foreground/70 pointer-events-none">
+        <p>Scroll</p>
+      </div> */}
       </div>
     </section>
   );
