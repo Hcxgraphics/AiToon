@@ -5,54 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 
 const THEMES = [
-  {
-    id: "neo",
-    title: "Neo",
-    image: "/themes/neo.jpg",
-    description: "Futuristic neon-drenched visuals with bold digital aesthetics and vibrant glowing accents.",
-  },
-  {
-    id: "cyberpunk",
-    title: "Cyberpunk",
-    image: "/themes/cyberpunk.jpg",
-    description: "Rain-soaked dystopian streets lit by holographic signs and moody atmospheric lighting.",
-  },
-  {
-    id: "anime-craft",
-    title: "Anime Craft",
-    image: "/themes/anime-craft.jpg",
-    description: "Colorful cel-shaded anime style with vibrant characters and detailed hand-drawn feel.",
-  },
-  {
-    id: "noir",
-    title: "Noir",
-    image: "/themes/noir.jpg",
-    description: "High-contrast black and white with dramatic shadows inspired by classic detective comics.",
-  },
-  {
-    id: "manga",
-    title: "Manga Style",
-    image: "/themes/manga.jpg",
-    description: "Traditional Japanese manga with dynamic ink lines, screentones, and action-packed panels.",
-  },
-  {
-    id: "manhwa",
-    title: "Korean Manhwa",
-    image: "/themes/manhwa.jpg",
-    description: "Full-color Korean webtoon aesthetic with soft shading and beautiful character designs.",
-  },
-  {
-    id: "manhua",
-    title: "Chinese Manhua",
-    image: "/themes/manhua.jpg",
-    description: "Traditional ink wash meets modern comic with wuxia-inspired martial arts scenes.",
-  },
-  {
-    id: "chibi",
-    title: "Chibi Kawaii",
-    image: "/themes/chibi.jpg",
-    description: "Adorable super-deformed characters with big sparkly eyes and pastel color palettes.",
-  },
+  { id: "neo", title: "Neo", image: "/themes/neo.jpg", description: "Futuristic neon-drenched visuals with bold digital aesthetics and vibrant glowing accents." },
+  { id: "cyberpunk", title: "Cyberpunk", image: "/themes/cyberpunk.jpg", description: "Rain-soaked dystopian streets lit by holographic signs and moody atmospheric lighting." },
+  { id: "anime-craft", title: "Anime Craft", image: "/themes/anime-craft.jpg", description: "Colorful cel-shaded anime style with vibrant characters and detailed hand-drawn feel." },
+  { id: "noir", title: "Noir", image: "/themes/noir.jpg", description: "High-contrast black and white with dramatic shadows inspired by classic detective comics." },
+  { id: "manga", title: "Manga Style", image: "/themes/manga.jpg", description: "Traditional Japanese manga with dynamic ink lines, screentones, and action-packed panels." },
+  { id: "manhwa", title: "Korean Manhwa", image: "/themes/manhwa.jpg", description: "Full-color Korean webtoon aesthetic with soft shading and beautiful character designs." },
+  { id: "manhua", title: "Chinese Manhua", image: "/themes/manhua.jpg", description: "Traditional ink wash meets modern comic with wuxia-inspired martial arts scenes." },
+  { id: "chibi", title: "Chibi Kawaii", image: "/themes/chibi.jpg", description: "Adorable super-deformed characters with big sparkly eyes and pastel color palettes." },
 ];
 
 export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
@@ -60,15 +20,19 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
   const [hoveredId, setHoveredId] = useState(null);
   const autoScrollRef = useRef(null);
   const isDragging = useRef(false);
+  const isHoveringCarousel = useRef(false);
   const startX = useRef(0);
-  const scrollLeft = useRef(0);
+  const scrollLeftPos = useRef(0);
 
   const startAutoScroll = useCallback(() => {
     if (autoScrollRef.current) cancelAnimationFrame(autoScrollRef.current);
     const scroll = () => {
       const el = scrollRef.current;
-      if (!el || isDragging.current) return;
-      el.scrollLeft += 0.5;
+      if (!el || isDragging.current || isHoveringCarousel.current) {
+        autoScrollRef.current = requestAnimationFrame(scroll);
+        return;
+      }
+      el.scrollLeft += 0.4;
       if (el.scrollLeft >= el.scrollWidth - el.clientWidth) {
         el.scrollLeft = 0;
       }
@@ -87,8 +51,7 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
   const handleMouseDown = (e) => {
     isDragging.current = true;
     startX.current = e.pageX - scrollRef.current.offsetLeft;
-    scrollLeft.current = scrollRef.current.scrollLeft;
-    if (autoScrollRef.current) cancelAnimationFrame(autoScrollRef.current);
+    scrollLeftPos.current = scrollRef.current.scrollLeft;
   };
 
   const handleMouseMove = (e) => {
@@ -96,12 +59,17 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
     const walk = (x - startX.current) * 1.5;
-    scrollRef.current.scrollLeft = scrollLeft.current - walk;
+    scrollRef.current.scrollLeft = scrollLeftPos.current - walk;
   };
 
   const handleMouseUp = () => {
     isDragging.current = false;
-    setTimeout(startAutoScroll, 2000);
+  };
+
+  const handleCarouselEnter = () => { isHoveringCarousel.current = true; };
+  const handleCarouselLeave = () => {
+    isHoveringCarousel.current = false;
+    isDragging.current = false;
   };
 
   return (
@@ -111,8 +79,9 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className="flex gap-5 overflow-x-auto pb-4 cursor-grab active:cursor-grabbing custom-scrollbar snap-x snap-mandatory"
+        onMouseEnter={handleCarouselEnter}
+        onMouseLeave={handleCarouselLeave}
+        className="flex gap-5 overflow-x-auto pb-4 cursor-grab active:cursor-grabbing snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
       >
         {[...THEMES, ...THEMES].map((theme, i) => {
@@ -142,20 +111,10 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
                   className="w-full h-full object-cover transition-all duration-500"
                   draggable={false}
                 />
-
-                {/* Darken on hover */}
-                <div
-                  className={`absolute inset-0 bg-black/0 transition-all duration-300 ${
-                    isHovered ? "bg-black/50" : ""
-                  }`}
-                />
-
-                {/* Title always visible */}
+                <div className={`absolute inset-0 bg-black/0 transition-all duration-300 ${isHovered ? "bg-black/50" : ""}`} />
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                   <h3 className="text-sm font-bold text-white">{theme.title}</h3>
                 </div>
-
-                {/* Description on hover */}
                 <AnimatePresence>
                   {isHovered && (
                     <motion.div
@@ -165,14 +124,10 @@ export const ThemeCarousel = ({ selectedTheme, onSelectTheme }) => {
                       transition={{ duration: 0.2 }}
                       className="absolute inset-0 flex items-center justify-center p-5"
                     >
-                      <p className="text-xs text-white/90 text-center leading-relaxed">
-                        {theme.description}
-                      </p>
+                      <p className="text-xs text-white/90 text-center leading-relaxed">{theme.description}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Selected indicator */}
                 {isSelected && (
                   <motion.div
                     initial={{ scale: 0 }}
