@@ -1,11 +1,16 @@
 from fastapi import FastAPI
 from routes import setup
 from config.db import db
+from routes import setup, project 
 
 
 app = FastAPI()
 
 app.include_router(setup.router)
+
+
+app.include_router(setup.router)
+app.include_router(project.router)  
 
 @app.get("/")
 def root():
@@ -15,3 +20,4 @@ def root():
 def test_db():
     db.projects.insert_one({"test": "wohooo! working :) "})
     return {"message": "DB connection successful!"}
+
