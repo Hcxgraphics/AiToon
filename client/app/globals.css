@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 20% 7%;
+    --foreground: 220 20% 90%;
+
+    --card: 222 18% 11%;
+    --card-foreground: 220 20% 90%;
+
+    --popover: 222 18% 11%;
+    --popover-foreground: 220 20% 90%;
+
+    --primary: 224 100% 71%;
+    --primary-foreground: 222 20% 7%;
+
+    --secondary: 222 14% 16%;
+    --secondary-foreground: 220 20% 80%;
+
+    --muted: 222 14% 16%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 224 100% 71%;
+    --accent-foreground: 222 20% 7%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 32 90% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 222 14% 18%;
+    --input: 222 14% 18%;
+    --ring: 224 100% 71%;
+
+    --radius: 0.75rem;
+
+    --panel-bg: 222 18% 11%;
+    --canvas-bg: 222 20% 7%;
+    --surface-hover: 222 14% 20%;
+    --glow-primary: 224 100% 71%;
+
+    --sidebar-background: 222 18% 11%;
+    --sidebar-foreground: 220 20% 90%;
+    --sidebar-primary: 224 100% 71%;
+    --sidebar-primary-foreground: 222 20% 7%;
+    --sidebar-accent: 222 14% 16%;
+    --sidebar-accent-foreground: 220 20% 90%;
+    --sidebar-border: 222 14% 18%;
+    --sidebar-ring: 224 100% 71%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .panel-surface {
+    @apply bg-card border border-border rounded-xl;
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(224 100% 71% / 0.15), 0 0 60px hsl(224 100% 71% / 0.05);
+  }
+
+  .glow-border {
+    box-shadow: inset 0 0 0 1px hsl(224 100% 71% / 0.3), 0 0 15px hsl(224 100% 71% / 0.1);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(222 14% 16%) 25%,
+      hsl(222 14% 22%) 50%,
+      hsl(222 14% 16%) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .panel-hover-glow {
+    @apply transition-all duration-200;
+  }
+  .panel-hover-glow:hover {
+    box-shadow: 0 0 0 1px hsl(224 100% 71% / 0.4), 0 4px 20px hsl(224 100% 71% / 0.1);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(222 14% 22%);
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(222 14% 28%);
+  }
+
+  /* Mouse scroll button animation */
+  .mouse-btn {
+    margin: 10px auto;
+    width: 40px;
+    height: 80px;
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    border-radius: 40px;
+    display: flex;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  .mouse-btn:hover {
+    border-color: rgba(255, 255, 255, 1);
+  }
+
+  .mouse-scroll {
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    margin: auto;
+    animation: scrolling13 1.5s linear infinite;
+  }
+
+  @keyframes scrolling13 {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+}
