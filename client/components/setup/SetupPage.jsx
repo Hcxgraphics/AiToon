@@ -33,16 +33,36 @@ export const SetupPage = () => {
     if (currentStep < 3) setCurrentStep((s) => s + 1);
   };
 
-  const handleCreateComic = () => {
-    // Pass setup data via query params or state management
-    const params = new URLSearchParams();
-    if (selectedTheme) params.set("theme", selectedTheme);
-    if (selectedCharacters.length) params.set("characters", selectedCharacters.join(","));
-    if (storyData.storyline) params.set("storyline", storyData.storyline);
-    if (storyData.tagline) params.set("tagline", storyData.tagline);
-    if (storyData.summary) params.set("summary", storyData.summary);
-    router.push(`/editor?${params.toString()}`);
-  };
+  const handleCreateComic = async () => {
+  try {
+    const res = await fetch("http://localhost:8000/setup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        theme: selectedTheme,
+        characters: selectedCharacters,
+        storyline: storyData.storyline,
+        tagline: storyData.tagline,
+        summary: storyData.summary
+      })
+    });
+
+    if (!res.ok) throw new Error("Failed to create comic");
+
+    const data = await res.json();
+
+    router.push(`/editor/${data.project_id}`);
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong!");
+  }
+};
+
+  
+
+  
 
   const stepContent = {
     1: {
