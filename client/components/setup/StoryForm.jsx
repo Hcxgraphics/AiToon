@@ -29,13 +29,25 @@ export const StoryForm = ({ storyData, onUpdateStory }) => {
   const handleSuggest = (key) => {
     setSuggesting(key);
     // Simulate AI delay
-    setTimeout(() => {
-      const options = AI_SUGGESTIONS[key];
-      const suggestion = options[Math.floor(Math.random() * options.length)];
-      onUpdateStory({ ...storyData, [key]: suggestion });
-      setSuggesting(null);
-    }, 800);
-  };
+    const handleAISuggest = async (type) => {
+  const res = await fetch("http://localhost:8000/ai/suggest", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      type,
+      context: storyData.storyline || selectedTheme
+    })
+  });
+
+  const data = await res.json();
+
+  setStoryData((prev) => ({
+    ...prev,
+    [type]: data.suggestion
+  }));
+};  };
 
   const fields = [
     { key: "storyline", label: "Storyline", icon: <BookOpen size={16} />, placeholder: "Describe your comic's main storyline...", rows: 3, required: true },
