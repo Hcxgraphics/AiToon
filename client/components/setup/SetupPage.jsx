@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +12,7 @@ export const SetupPage = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [selectedCharacters, setSelectedCharacters] = useState([]);
   const [storyData, setStoryData] = useState({ storyline: "", tagline: "", summary: "" });
 
@@ -33,15 +33,17 @@ export const SetupPage = () => {
     if (currentStep < 3) setCurrentStep((s) => s + 1);
   };
 
-  const handleCreateComic = async () => {
+ const handleCreateComic = async () => {
   try {
+    setLoading(true);
+
     const res = await fetch("http://localhost:8000/setup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        theme: selectedTheme,
+        theme: selectedTheme?.name || selectedTheme ,
         characters: selectedCharacters,
         storyline: storyData.storyline,
         tagline: storyData.tagline,
@@ -51,18 +53,22 @@ export const SetupPage = () => {
 
     if (!res.ok) throw new Error("Failed to create comic");
 
+    if (!storyData.storyline) {
+  alert("Please enter storyline");
+  return;
+}
+
     const data = await res.json();
 
     router.push(`/editor/${data.project_id}`);
   } catch (err) {
     console.error(err);
     alert("Something went wrong!");
+  } finally {
+    setLoading(false);
   }
 };
 
-  
-
-  
 
   const stepContent = {
     1: {

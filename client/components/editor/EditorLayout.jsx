@@ -1,68 +1,57 @@
 'use client';
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { LeftPanel } from "./LeftPanel";
 import { CenterCanvas } from "./CenterCanvas";
 import { ChatPanel } from "./ChatPanel";
 import { EditorNavbar } from "./EditorNavbar";
 
 const EditorContent = () => {
-  const [selectedPanelId, setSelectedPanelId] = useState("p1-1");
-  const [pages, setPages] = useState([
+  const { id } = useParams(); // 🔥 get project_id from URL
+  const [project, setProject] = useState(null);
+  const [selectedPanelId, setSelectedPanelId] = useState(null);
+
+  // 🔥 Fetch project from backend
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/project/${id}`);
+        const data = await res.json();
+
+        setProject(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (id) fetchProject();
+  }, [id]);
+
+  // 🔥 Loading state
+  if (!project) {
+    return <div className="p-6">Loading...</div>;
+  }
+
+  // 🔥 Convert backend panels → pages (temporary structure)
+  const pages = [
     {
       id: "page-1",
       name: "Page 1",
-      panels: [
-        {
-          id: "p1-1", name: "Panel 1", status: "generated", characters: ["Hero"],
-          expression: "Determined", pose: "Standing",
-          dialogue: "The city never sleeps... and neither do I.",
-          background: "Rooftop at night", bubbleType: "narration",
-          notes: "Opening scene — establish mood and setting",
-          versions: [
-            { id: "v1", label: "v1 — initial", timestamp: "2 hours ago" },
-            { id: "v2", label: "v2 — dialogue change", timestamp: "1 hour ago" },
-          ],
-        },
-        {
-          id: "p1-2", name: "Panel 2", status: "generated", characters: ["Hero", "Villain"],
-          expression: "Tense", pose: "Confrontation",
-          dialogue: "You shouldn't have come here.",
-          background: "Dark alley", bubbleType: "normal",
-          notes: "Build tension before fight",
-          versions: [{ id: "v1", label: "v1 — initial", timestamp: "1 hour ago" }],
-        },
-        {
-          id: "p1-3", name: "Panel 3", status: "generating", characters: ["Hero"],
-          expression: "Action", pose: "Leaping", background: "Explosion",
-          bubbleType: "shout", notes: "Climactic action moment", versions: [],
-        },
-      ],
-    },
-    {
-      id: "page-2",
-      name: "Page 2",
-      panels: [
-        {
-          id: "p2-1", name: "Panel 1", status: "needs-dialogue", characters: ["Villain"],
-          expression: "Menacing", pose: "Close-up", background: "Shadow",
-          bubbleType: "whisper", notes: "Villain reveal", versions: [],
-        },
-        {
-          id: "p2-2", name: "Panel 2", status: "idle", characters: [],
-          notes: "To be designed", versions: [],
-        },
-      ],
-    },
-  ]);
+      panels: project.panels || []
+    }
+  ];
 
   const allPanels = pages.flatMap((p) => p.panels);
-  const selectedPanel = allPanels.find((p) => p.id === selectedPanelId) || null;
+  const selectedPanel =
+    allPanels.find((p) => p.id === selectedPanelId) || null;
 
   return (
     <>
       <EditorNavbar />
       <div className="flex flex-1 overflow-hidden">
+        
+        {/* Left Panel */}
         <div className="w-[25%] min-w-[280px] max-w-[360px] border-r border-border flex flex-col">
           <LeftPanel
             pages={pages}
@@ -71,6 +60,8 @@ const EditorContent = () => {
             onSelectPanel={setSelectedPanelId}
           />
         </div>
+
+        {/* Center Canvas */}
         <div className="flex-1 flex flex-col min-w-0">
           <CenterCanvas
             pages={pages}
@@ -78,8 +69,17 @@ const EditorContent = () => {
             onSelectPanel={setSelectedPanelId}
           />
         </div>
+
+        {/* Right Panel */}
         <div className="w-[25%] min-w-[280px] max-w-[360px] border-l border-border flex flex-col">
-          <ChatPanel allVersions={allPanels.flatMap((p) => (p.versions || []).map((v) => ({ ...v, panelName: p.name })))} />
+          <ChatPanel
+            allVersions={allPanels.flatMap((p) =>
+              (p.versions || []).map((v) => ({
+                ...v,
+                panelName: p.name
+              }))
+            )}
+          />
         </div>
       </div>
     </>
