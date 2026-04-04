@@ -39,6 +39,7 @@ server/venv/
 # Environment variables
 .env
 server/.env
+orchestrator/.env
 
 # IDE
 .vscode/

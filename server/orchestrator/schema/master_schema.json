@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["story_summary", "theme", "characters", "panels"],
+  "properties": {
+    "story_summary": {
+      "type": "string"
+    },
+    "theme": {
+      "type": "string"
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["char_id", "name", "appearance", "emotion_default", "pose_default"],
+        "properties": {
+          "char_id": { "type": "string" },
+          "name": { "type": "string" },
+          "appearance": { "type": "string" },
+          "emotion_default": { "type": "string" },
+          "pose_default": { "type": "string" }
+        }
+      }
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "panel_id",
+          "theme",
+          "scene_description",
+          "location",
+          "time",
+          "camera_angle",
+          "action",
+          "emotion",
+          "characters",
+          "dialogues",
+          "narration"
+        ],
+        "properties": {
+          "panel_id": { "type": "integer" },
+          "theme": { "type": "string" },
+          "scene_description": { "type": "string" },
+          "location": { "type": "string" },
+          "time": { "type": "string" },
+          "camera_angle": { "type": "string" },
+          "action": { "type": "string" },
+          "emotion": { "type": "string" },
+          "characters": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "dialogues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["char_id", "text", "tone", "bubble_type", "position_hint"],
+              "properties": {
+                "char_id": { "type": "string" },
+                "text": { "type": "string" },
+                "tone": { "type": "string" },
+                "bubble_type": { "type": "string" },
+                "position_hint": { "type": "string" }
+              }
+            }
+          },
+          "narration": { "type": "string" }
+        }
+      }
+    }
+  }
+}

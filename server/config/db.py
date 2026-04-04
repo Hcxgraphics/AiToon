@@ -6,3 +6,6 @@ load_dotenv()
 
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client["comic_ai"]
+
+def get_db():
+    return db

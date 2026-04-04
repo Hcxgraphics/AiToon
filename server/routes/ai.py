@@ -1,18 +1,26 @@
 from typing import List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os
 from groq import Groq
+from orchestrator.logger import get_logger
+from services.ai_service import run_orchestrator
 
 router = APIRouter()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+logger = get_logger("routes.ai")
 
 class SuggestRequest(BaseModel):
     type: str   # storyline / tagline / summary
     context: str
     characters: Optional[List[str]] = [] 
+
+
+class GenerateRequest(BaseModel):
+    prompt: str
+    theme: Optional[str] = None
 
 def format_characters(chars):
     if not chars:
@@ -53,3 +61,13 @@ def suggest(data: SuggestRequest):
     return {
         "suggestion": response.choices[0].message.content
     }
+
+
+@router.post("/generate")
+def generate(data: GenerateRequest):
+    try:
+        result = run_orchestrator(data.prompt, data.theme)
+        return {"result": result}
+    except Exception as exc:
+        logger.error("Orchestrator generation failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
