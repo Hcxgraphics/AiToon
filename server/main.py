@@ -1,16 +1,23 @@
 from fastapi import FastAPI
-from routes import setup
+from fastapi.middleware.cors import CORSMiddleware
+from routes import setup, project
 from config.db import db
-from routes import setup, project 
+from routes import ai
 
 
 app = FastAPI()
 
-app.include_router(setup.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
-
 app.include_router(setup.router)
-app.include_router(project.router)  
+app.include_router(project.router)
+app.include_router(ai.router)
 
 @app.get("/")
 def root():
@@ -18,6 +25,5 @@ def root():
 
 @app.get("/test-db")
 def test_db():
-    db.projects.insert_one({"test": "wohooo! working :) "})
+    db.projects.insert_one({"test": "working"})
     return {"message": "DB connection successful!"}
-
