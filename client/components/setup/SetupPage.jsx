@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,11 +11,16 @@ import { StoryForm } from "./StoryForm";
 
 export const SetupPage = () => {
   const router = useRouter();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [selectedCharacters, setSelectedCharacters] = useState([]);
-  const [storyData, setStoryData] = useState({ storyline: "", tagline: "", summary: "" });
+  const [storyData, setStoryData] = useState({
+    storyline: "",
+    tagline: "",
+    summary: ""
+  });
+  const [loading, setLoading] = useState(false);
 
   const canProceed = () => {
     if (currentStep === 1) return !!selectedTheme;
@@ -33,48 +39,54 @@ export const SetupPage = () => {
     if (currentStep < 3) setCurrentStep((s) => s + 1);
   };
 
- const handleCreateComic = async () => {
-  try {
-    setLoading(true);
-
-    const res = await fetch("http://localhost:8000/setup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        theme: selectedTheme?.name || selectedTheme ,
-        characters: selectedCharacters,
-        storyline: storyData.storyline,
-        tagline: storyData.tagline,
-        summary: storyData.summary
-      })
-    });
-
-    if (!res.ok) throw new Error("Failed to create comic");
-
+  // ✅ FIXED FUNCTION
+  const handleCreateComic = async () => {
+    // 🔥 validation FIRST
     if (!storyData.storyline) {
-  alert("Please enter storyline");
-  return;
-}
+      alert("Please enter storyline");
+      return;
+    }
 
-    const data = await res.json();
+    try {
+      setLoading(true);
 
-    router.push(`/editor/${data.project_id}`);
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong!");
-  } finally {
-    setLoading(false);
-  }
-};
+      const res = await fetch("http://localhost:8000/setup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          theme: selectedTheme?.name || selectedTheme,
+          characters: selectedCharacters,
+          storyline: storyData.storyline,
+          tagline: storyData.tagline,
+          summary: storyData.summary
+        })
+      });
 
+      if (!res.ok) throw new Error("Failed to create comic");
+
+      const data = await res.json();
+
+      router.push(`/editor/${data.project_id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stepContent = {
     1: {
       title: "Choose Your Theme",
       subtitle: "Select a visual style for your comic",
-      component: <ThemeCarousel selectedTheme={selectedTheme} onSelectTheme={setSelectedTheme} />,
+      component: (
+        <ThemeCarousel
+          selectedTheme={selectedTheme}
+          onSelectTheme={setSelectedTheme}
+        />
+      )
     },
     2: {
       title: "Choose Characters",
@@ -84,13 +96,19 @@ export const SetupPage = () => {
           selectedCharacters={selectedCharacters}
           onSelectCharacters={setSelectedCharacters}
         />
-      ),
+      )
     },
     3: {
       title: "Story Basics",
       subtitle: "Give your AI assistant some context",
-      component: <StoryForm storyData={storyData} onUpdateStory={setStoryData} />,
-    },
+      component: (
+        <StoryForm
+          storyData={storyData}
+          onUpdateStory={setStoryData}
+          selectedCharacters={selectedCharacters} // ✅ IMPORTANT
+        />
+      )
+    }
   };
 
   const current = stepContent[currentStep];
@@ -103,36 +121,41 @@ export const SetupPage = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl md:text-4xl font-bold text-foreground tracking-tight"
-          style={{ textShadow: "0 0 40px hsl(224 100% 71% / 0.2)" }}
         >
           Create Your Comic
         </motion.h1>
+
         <div className="mt-6">
           <ProgressStepper currentStep={currentStep} />
         </div>
       </div>
 
-      {/* Step content */}
-      <div className="flex-1 px-6 md:px-12 lg:px-20 pb-4 overflow-y-auto custom-scrollbar">
+      {/* Content */}
+      <div className="flex-1 px-6 md:px-12 lg:px-20 pb-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3 }}
             className="max-w-4xl mx-auto"
           >
             <div className="text-center mb-8">
-              <h2 className="text-xl font-semibold text-foreground">{current.title}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{current.subtitle}</p>
+              <h2 className="text-xl font-semibold">
+                {current.title}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {current.subtitle}
+              </p>
             </div>
+
             {current.component}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
+      {/* Footer */}
       <div className="px-6 md:px-12 lg:px-20 pb-8">
         <NavigationControls
           currentStep={currentStep}
@@ -141,6 +164,7 @@ export const SetupPage = () => {
           onSkip={handleSkip}
           canProceed={canProceed()}
           onCreateComic={handleCreateComic}
+          loading={loading} // optional if you use spinner
         />
       </div>
     </div>
