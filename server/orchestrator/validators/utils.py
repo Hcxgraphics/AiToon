@@ -12,14 +12,16 @@ def pass_validation(state, error_key: str):
 
 def fail_validation(state, retry_key: str, error_key: str, message: str):
     retries = state.get(retry_key, 0)
+    next_retries = retries + 1
+
     next_state = {
         **state,
         "valid": False,
         error_key: message,
-        retry_key: retries + 1,
+        retry_key: next_retries,
     }
 
-    if retries >= MAX_RETRIES:
+    if next_retries >= MAX_RETRIES:
         next_state["abort"] = True
         next_state["fatal_error"] = f"{error_key}: {message}"
 
