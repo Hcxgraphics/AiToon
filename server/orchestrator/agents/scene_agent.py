@@ -17,8 +17,14 @@ def generate_scenes(
     )
     raw = (llm_client or llm).generate(prompt, task_type="long_story")
 
+    print("\nRAW SCENE OUTPUT:\n" , raw)
+
     try:
         parsed = parse_json_response(raw)
+
+        if isinstance(parsed, dict) and "panels" in parsed:
+            parsed = parsed["panels"]
+            
     except ValueError as exc:
         return {"error": f"invalid_json: {exc}", "raw": raw}
 
