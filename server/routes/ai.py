@@ -30,17 +30,17 @@ def format_characters(chars):
     if not chars:
         return "No characters provided"
     
-    text="" 
+    text = ""
     for c in chars:
         if isinstance(c, str):
-            text += f"\nName: {c}\n"
+            text += f"\n- {c}"
         else:
             text += f"""
-            Name: {c.get('name')}
-            Personality: {c.get('personality')}
-            Style: {c.get('style')}
-            Appearance: {c.get('appearance')}
-            """
+- Name: {c.get('name')}
+  Personality: {c.get('personality')}
+  Style: {c.get('style')}
+  Appearance: {c.get('appearance')}
+"""
     return text
 
 
@@ -51,11 +51,36 @@ def suggest(data: SuggestRequest):
     char_context = format_characters(data.characters)
 
     prompt = f"""
-    Generate a {data.type} for a comic story.
-    Characters: {char_context}
-    Context: {data.context}
-    Keep it engaging and creative.
-    """
+        You are an AI Comic Writer.
+
+STRICT RULES:
+- You MUST use ONLY the provided characters
+- DO NOT invent new characters
+- DO NOT rename characters
+- DO NOT introduce extra characters
+
+CHARACTERS:
+{char_context}
+
+TASK:
+Generate a {data.type} for a comic story.
+
+CONTEXT:
+{data.context}
+
+STYLE:
+- Engaging
+- Creative
+- Cinematic
+
+IMPORTANT:
+- Use EXACT character names given above
+- Every main character must be from the list
+- If you introduce any new character, the output is INVALID
+
+OUTPUT:
+Return only the {data.type}.
+"""
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
@@ -65,7 +90,6 @@ def suggest(data: SuggestRequest):
     return {
         "suggestion": response.choices[0].message.content
     }
-
 
 @router.post("/generate")
 def generate(data: GenerateRequest):
