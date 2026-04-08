@@ -63,12 +63,14 @@ export const CharacterLibrary = ({ selectedCharacters, onSelectCharacters }) => 
   });
 
   const toggleCharacter = (id) => {
-    onSelectCharacters(
-      selectedCharacters.includes(id)
-        ? selectedCharacters.filter((c) => c !== id)
-        : [...selectedCharacters, id]
-    );
-  };
+  const charObj = allCharacters.find((c) => c.id === id);
+
+  onSelectCharacters((prev) =>
+    prev.some((c) => c.id === id)
+      ? prev.filter((c) => c.id !== id)
+      : [...prev, charObj]
+  );
+};
 
   const handleCreateCharacter = (char) => {
     const newChar = {
@@ -129,12 +131,11 @@ export const CharacterLibrary = ({ selectedCharacters, onSelectCharacters }) => 
       {/* Selected characters */}
       {selectedCharacters.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {selectedCharacters.map((id) => {
-            const char = allCharacters.find((c) => c.id === id);
+          {selectedCharacters.map((char) => {
             if (!char) return null;
             return (
               <motion.div
-                key={id}
+                key={char.id}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-xs text-primary"
@@ -165,7 +166,7 @@ export const CharacterLibrary = ({ selectedCharacters, onSelectCharacters }) => 
         </motion.div>
 
         {filteredCharacters.map((char, i) => {
-          const isSelected = selectedCharacters.includes(char.id);
+          const isSelected = selectedCharacters.some((c) => c.id === char.id);
           return (
             <motion.div
               key={char.id}

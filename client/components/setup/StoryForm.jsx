@@ -9,34 +9,39 @@ export const StoryForm = ({ storyData, onUpdateStory , selectedCharacters }) => 
   const [suggesting, setSuggesting] = useState(null);
 
   const handleAISuggest = async (type) => {
-    try {
-      setSuggesting(type);
+  try {
+    setSuggesting(type);
 
-      const res = await fetch("http://127.0.0.1:8000/ai/suggest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          type: type,
-          context: storyData.storyline || "comic story" ,
-          characters : selectedCharacters || []
-        })
-      });
+    console.log("Sending characters:", selectedCharacters);
+    console.log("Mapped:", (selectedCharacters || []).map(c => c.name));
 
-      const data = await res.json();
+    const res = await fetch("http://127.0.0.1:8000/ai/suggest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        type: type,
+        context: storyData.storyline || "comic story",
+        characters: (selectedCharacters || []).map(c =>
+          typeof c === "string" ? c : c.name
+        )
+      })
+    });
 
-      onUpdateStory({
-        ...storyData,
-        [type]: data.suggestion
-      });
+    const data = await res.json();
 
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSuggesting(null);
-    }
-  };
+    onUpdateStory({
+      ...storyData,
+      [type]: data.suggestion
+    });
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setSuggesting(null);
+  }
+};
 
   const fields = [
     { key: "storyline", label: "Storyline", icon: <BookOpen size={16} />, placeholder: "Describe your comic's main storyline...", rows: 3, required: true },
