@@ -8,17 +8,16 @@ import { ChatPanel } from "./ChatPanel";
 import { EditorNavbar } from "./EditorNavbar";
 
 const EditorContent = () => {
-  const { id } = useParams(); // 🔥 get project_id from URL
+  const { id } = useParams();
   const [project, setProject] = useState(null);
   const [selectedPanelId, setSelectedPanelId] = useState(null);
 
-  // 🔥 Fetch project from backend
+  // Fetch project
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const res = await fetch(`http://localhost:8000/project/${id}`);
         const data = await res.json();
-
         setProject(data);
       } catch (err) {
         console.error(err);
@@ -28,27 +27,48 @@ const EditorContent = () => {
     if (id) fetchProject();
   }, [id]);
 
-  // 🔥 Loading state
+  //  Auto-select first panel
+  useEffect(() => {
+    if (project?.panels?.length > 0) {
+      setSelectedPanelId(project.panels[0].panel_id);
+    }
+  }, [project]);
+
   if (!project) {
     return <div className="p-6">Loading...</div>;
   }
 
-  // 🔥 Convert backend panels → pages (temporary structure)
+  //  Character Map (FIXED)
+  const characterMap = Object.fromEntries(
+    (project.characters || []).map((c) => [c.char_id, c])
+  );
+
+  //  Normalize panels (FIXED)
   const pages = [
     {
       id: "page-1",
       name: "Page 1",
-      panels: project.panels || []
-    }
+      panels: (project.panels || []).map((p) => ({
+        id: p.panel_id, // ✅ IMPORTANT
+        name: `Panel ${p.panel_id}`,
+        scene: p.scene_description,
+        characters: p.characters,
+        dialogues: p.dialogues,
+        narration: p.narration,
+        raw: p,
+      })),
+    },
   ];
 
   const allPanels = pages.flatMap((p) => p.panels);
+
   const selectedPanel =
     allPanels.find((p) => p.id === selectedPanelId) || null;
 
   return (
     <>
       <EditorNavbar />
+
       <div className="flex flex-1 overflow-hidden">
         
         {/* Left Panel */}
@@ -58,6 +78,7 @@ const EditorContent = () => {
             selectedPanel={selectedPanel}
             selectedPanelId={selectedPanelId}
             onSelectPanel={setSelectedPanelId}
+            characterMap={characterMap} 
           />
         </div>
 
@@ -67,20 +88,21 @@ const EditorContent = () => {
             pages={pages}
             selectedPanelId={selectedPanelId}
             onSelectPanel={setSelectedPanelId}
+            characterMap={characterMap} // ✅ FIXED
           />
         </div>
 
         {/* Right Panel */}
         <div className="w-[25%] min-w-[280px] max-w-[360px] border-l border-border flex flex-col">
           <ChatPanel
-            allVersions={allPanels.flatMap((p) =>
-              (p.versions || []).map((v) => ({
-                ...v,
-                panelName: p.name
-              }))
-            )}
+            project={project}
+            allVersions={allPanels.map((p) => ({
+              text: p.scene,
+              panelName: p.name,
+            }))} 
           />
         </div>
+
       </div>
     </>
   );

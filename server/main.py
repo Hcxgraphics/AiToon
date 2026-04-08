@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import setup, project
-from config.db import db
+from config.db import get_db
 from routes import ai
 
 

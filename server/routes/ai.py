@@ -5,6 +5,7 @@ from pydantic import BaseModel
 import os
 from groq import Groq
 from orchestrator.logger import get_logger
+from config.db import get_db
 from services.ai_service import run_orchestrator
 
 router = APIRouter()
@@ -19,8 +20,11 @@ class SuggestRequest(BaseModel):
 
 
 class GenerateRequest(BaseModel):
-    prompt: str
-    theme: Optional[str] = None
+    project_id: str
+    storyline: str
+    summary: Optional[str] = ""
+    characters: Optional[List[dict]] = []
+    theme: Optional[str] = None  
 
 def format_characters(chars):
     if not chars:
@@ -66,8 +70,38 @@ def suggest(data: SuggestRequest):
 @router.post("/generate")
 def generate(data: GenerateRequest):
     try:
-        result = run_orchestrator(data.prompt, data.theme)
-        return {"result": result}
+        db = get_db()
+
+        prompt = f"""
+        Storyline: {data.storyline}
+        Summary: {data.summary}
+        """
+
+        result = run_orchestrator(prompt , data.theme)
+
+        final_output = result["final_output"]
+        debug_data = result.get("debug", {})
+
+        db.projects.update_one(
+            {"_id": data.project_id},
+            {
+                "$set": {
+                    "panels": final_output["panels"],
+                    "characters": final_output["characters"],
+                    "debug": debug_data
+                }
+            }
+        )
+
+        return {
+            "final_output": result["final_output"],
+            "debug": {
+                "scene_data": result.get("scene_data"),
+                "character_data": result.get("character_data"),
+                "dialogue_data": result.get("dialogue_data"),
+            }
+        }
+
     except Exception as exc:
         logger.error("Orchestrator generation failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise HTTPException(status_code=500, detail=str(exc))

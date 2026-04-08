@@ -1,6 +1,5 @@
 from orchestrator.core.graph import run_pipeline
 
-
 def test_orchestrator():
     prompt = """
 A brave warrior enters a dark forest and encounters a mysterious shadow creature.

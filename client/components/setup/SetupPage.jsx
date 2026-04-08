@@ -39,43 +39,91 @@ export const SetupPage = () => {
     if (currentStep < 3) setCurrentStep((s) => s + 1);
   };
 
-  // ✅ FIXED FUNCTION
-  const handleCreateComic = async () => {
-    // 🔥 validation FIRST
-    if (!storyData.storyline) {
-      alert("Please enter storyline");
-      return;
+  // FIXED FUNCTION
+ const handleCreateComic = async () => {
+  if (!storyData.storyline) {
+    alert("Please enter storyline");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    console.log("🚀 Creating project...");
+
+    // ✅ STEP 1: CREATE PROJECT
+    const setupRes = await fetch("http://localhost:8000/setup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        theme: selectedTheme?.name || selectedTheme,
+        characters: selectedCharacters || [],
+        storyline: storyData.storyline,
+        tagline: storyData.tagline,
+        summary: storyData.summary
+      })
+    });
+
+    if (!setupRes.ok) {
+      throw new Error("❌ Failed to create project");
     }
 
-    try {
-      setLoading(true);
+    const setupData = await setupRes.json();
 
-      const res = await fetch("http://localhost:8000/setup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          theme: selectedTheme?.name || selectedTheme,
-          characters: selectedCharacters,
-          storyline: storyData.storyline,
-          tagline: storyData.tagline,
-          summary: storyData.summary
-        })
-      });
+    console.log("✅ Project created:", setupData);
 
-      if (!res.ok) throw new Error("Failed to create comic");
+    // 🔥 USER FEEDBACK
+    console.log("⚡ Generating comic using AI...");
 
-      const data = await res.json();
+    // ✅ STEP 2: CALL ORCHESTRATOR
+    const generateBody = {
+      project_id: setupData.project_id,
+      storyline: storyData.storyline,
+      summary: storyData.summary || "",
+      characters: (selectedCharacters || []).map((c) =>
+        typeof c === "string"
+          ? { name: c } // fallback if ID
+          : {
+              name: c.name,
+              personality: c.personality || "",
+              style: c.style || "",
+              appearance: c.appearance || ""
+            }
+      )
+    };
 
-      router.push(`/editor/${data.project_id}`);
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong!");
-    } finally {
-      setLoading(false);
+    console.log("📤 GENERATE REQUEST:", generateBody);
+
+    const genRes = await fetch("http://localhost:8000/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(generateBody)
+    });
+
+    if (!genRes.ok) {
+      const errText = await genRes.text();
+      console.error("❌ Generate failed:", errText);
+      throw new Error("AI generation failed");
     }
-  };
+
+    const genData = await genRes.json();
+
+    console.log("🔥 AI OUTPUT:", genData);
+
+    // ✅ STEP 3: REDIRECT AFTER SUCCESS
+    router.push(`/editor/${setupData.project_id}`);
+
+  } catch (err) {
+    console.error("🚨 ERROR:", err);
+    alert("Something went wrong during comic generation!");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const stepContent = {
     1: {

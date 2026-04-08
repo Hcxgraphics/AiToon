@@ -213,4 +213,11 @@ def run_pipeline(user_input, llm_client=None, constraints_provider=None, user_id
             )
         )
 
-    return result["final_output"]
+    return {
+    "final_output": result["final_output"],
+    "debug": {
+        "scene_data": result.get("scene_data"),
+        "character_data": result.get("character_data"),
+        "dialogue_data": result.get("dialogue_data"),
+    }
+}

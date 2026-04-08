@@ -1,4 +1,3 @@
-from prompt_toolkit import prompt
 
 from config.db import get_db
 from services.character_service import CharacterService

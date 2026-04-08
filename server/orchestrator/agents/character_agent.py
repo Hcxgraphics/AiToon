@@ -19,10 +19,41 @@ def generate_characters(
 
     try:
         parsed = parse_json_response(raw)
+
+        for panel in parsed:
+            for char in panel.get("characters", []):
+
+                if not char.get("appearance") or not char["appearance"].strip():
+                    char["appearance"] = "Generic character with distinct look"
+
+                if not char.get("emotion") or not char["emotion"].strip():
+                    char["emotion"] = "Neutral"
+
+                if not char.get("pose") or not char["pose"].strip():
+                    char["pose"] = "Standing"
+
+                if not char.get("name") or not char["name"].strip():
+                    char["name"] = "Unknown"
+
     except ValueError as exc:
         return {"error": f"invalid_json: {exc}", "raw": raw}
 
     if not isinstance(parsed, list):
-        return {"error": "character_output_must_be_a_list", "raw": raw}
+        return [
+        {
+            "panel_id": panel.get("panel_id"),
+            "characters": [
+                {
+                    "char_id": "c1",
+                    "name": "Unknown",
+                    "appearance": "Default",
+                    "emotion": "Neutral",
+                    "pose": "Standing"
+                }
+            ]
+        }
+        for panel in scene_data
+    ]
 
     return parsed
+
