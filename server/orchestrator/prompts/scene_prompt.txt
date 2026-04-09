@@ -17,6 +17,7 @@ Required JSON format:
     "camera_angle": "Specific framing or shot type",
     "action": "What is happening in the panel",
     "emotion": "Dominant emotion in the panel"
+    
   }}
 ]
 

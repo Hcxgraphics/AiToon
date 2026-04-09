@@ -1,10 +1,16 @@
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 
-client = MongoClient(os.getenv("MONGO_URI"))
+client = MongoClient(
+    os.getenv("MONGO_URI"),
+    tls=True,
+    tlsCAFile=certifi.where()
+)
+
 db = client["comic_ai"]
 
 def get_db():

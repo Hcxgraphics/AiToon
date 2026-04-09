@@ -19,7 +19,11 @@ FORMAT:
     "panel_id": 1,
     "characters": [
       {{
-        "char_id": "c1"
+        "char_id": "c1",
+        "name": "Kai",
+        "appearance": "Tall athletic male with spiky black hair and sharp blue eyes",
+        "emotion": "Determined",
+        "pose": "Standing with clenched fists"
       }}
     ]
   }}
