@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+CURRENT_FILE = Path(__file__).resolve()
+APP_ROOT = CURRENT_FILE.parents[3]
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
 
 from config.db import get_db
 from orchestrator.logger import get_logger
+from image_gen.db.prompt_history_store import PromptHistoryStore
 from services.engine import ImageGenerationService
 
 logger = get_logger("services.workflows.editor")
@@ -14,6 +22,7 @@ class EditorWorkflowService:
 
     def __init__(self, image_service: ImageGenerationService | None = None):
         self.image_service = image_service or ImageGenerationService()
+        self.prompt_history_store = PromptHistoryStore()
 
     def generate_from_orchestrator_output(
         self,
@@ -28,6 +37,7 @@ class EditorWorkflowService:
                 panels=final_output.get("panels", []),
                 rendered_panels=rendered_panels,
             )
+            self._save_prompt_histories(final_output=final_output, rendered_panels=rendered_panels)
 
         package = {
             "final_output": final_output,
@@ -83,3 +93,47 @@ class EditorWorkflowService:
                 panel_copy["image_path"] = render_result.get("output_path")
             merged.append(panel_copy)
         return merged
+
+    def _save_prompt_histories(
+        self,
+        final_output: Dict[str, Any],
+        rendered_panels: List[Dict[str, Any]],
+    ) -> None:
+        rendered_by_panel = {
+            item["panel_id"]: item for item in rendered_panels if "panel_id" in item
+        }
+        for panel in final_output.get("panels", []):
+            render_result = rendered_by_panel.get(panel.get("panel_id"))
+            if not render_result:
+                continue
+            prompt = str(render_result.get("prompt", "")).strip()
+            self.prompt_history_store.save_prompt_history(
+                panel_id=int(panel["panel_id"]),
+                prompt_data={
+                    "original_prompt": prompt,
+                    "final_render_prompt": prompt,
+                    "character_anchor_tokens": self._extract_anchor_tokens(prompt),
+                    "scene_metadata": self._build_scene_metadata(panel, final_output),
+                    "last_model_used": render_result.get("model_used"),
+                },
+            )
+
+    @staticmethod
+    def _extract_anchor_tokens(prompt: str) -> List[str]:
+        import re
+
+        return re.findall(r"\[[A-Z0-9_]+]", prompt or "")
+
+    @staticmethod
+    def _build_scene_metadata(panel: Dict[str, Any], final_output: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "theme": panel.get("theme") or final_output.get("theme"),
+            "scene_description": panel.get("scene_description"),
+            "location": panel.get("location"),
+            "time": panel.get("time"),
+            "camera_angle": panel.get("camera_angle"),
+            "action": panel.get("action"),
+            "emotion": panel.get("emotion"),
+            "characters": panel.get("characters", []),
+            "dialogues": panel.get("dialogues", []),
+        }

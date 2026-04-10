@@ -11,14 +11,7 @@ class SceneModelRouter:
 
     def route(self, scene: SceneTask) -> RoutingDecision:
         complexity_score = self._score_complexity(scene)
-        if self._is_high_priority_final(scene, complexity_score):
-            primary = "sdxl"
-        elif len(scene.character_ids) >= 2 or complexity_score >= 5:
-            primary = "lightning"
-        elif complexity_score <= 1:
-            primary = "flux"
-        else:
-            primary = get_default_model()
+        primary = get_default_model()
 
         return RoutingDecision(
             primary_model=primary,
@@ -44,12 +37,9 @@ class SceneModelRouter:
         return score
 
     @staticmethod
-    def _is_high_priority_final(scene: SceneTask, complexity_score: int) -> bool:
-        return str(scene.importance).lower() in {"high", "hero", "key", "climax", "critical"} or complexity_score >= 7
-
-    @staticmethod
     def _build_reasons(scene: SceneTask, complexity_score: int) -> List[str]:
         return [
+            f"primary_model={get_default_model()}",
             f"complexity_score={complexity_score}",
             f"characters={len(scene.character_ids)}",
             f"dialogues={len(scene.dialogues)}",
