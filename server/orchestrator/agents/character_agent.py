@@ -20,19 +20,29 @@ def generate_characters(
     try:
         parsed = parse_json_response(raw)
 
-        for panel in parsed:
-            for char in panel.get("characters", []):
+        normalized = []
 
-                if not char.get("appearance") or not char["appearance"].strip():
+        for panel in parsed:
+            if not isinstance(panel, dict):
+                continue
+
+            if "characters" not in panel or not isinstance(panel["characters"], list):
+                panel["characters"] = []
+
+            for char in panel["characters"]:
+                if not isinstance(char, dict):
+                    continue
+
+                if not char.get("appearance"):
                     char["appearance"] = "Generic character with distinct look"
 
-                if not char.get("emotion") or not char["emotion"].strip():
+                if not char.get("emotion"):
                     char["emotion"] = "Neutral"
 
-                if not char.get("pose") or not char["pose"].strip():
+                if not char.get("pose"):
                     char["pose"] = "Standing"
 
-                if not char.get("name") or not char["name"].strip():
+                if not char.get("name"):
                     char["name"] = "Unknown"
 
     except ValueError as exc:

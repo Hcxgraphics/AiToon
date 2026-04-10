@@ -20,6 +20,18 @@ class StarterGenerateRequest(BaseModel):
     user_id: Optional[str] = "test_user"
 
 
+
+def serialize(data):
+    from bson import ObjectId
+
+    if isinstance(data, dict):
+        return {k: serialize(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [serialize(v) for v in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    return data
+
 @router.post("/generate")
 def generate(data: StarterGenerateRequest):
     try:
@@ -31,11 +43,14 @@ def generate(data: StarterGenerateRequest):
             theme=data.theme,
             user_id=data.user_id or "test_user",
         )
-        return {
+        return serialize({
             "final_output": package["final_output"],
             "image_generation": package["image_generation"],
             "debug": package["debug"],
-        }
+        })
     except Exception as exc:
         logger.error("Starter workflow generation failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+

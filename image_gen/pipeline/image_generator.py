@@ -7,6 +7,17 @@ from image_gen.core.config import BATCH_CONFIG
 from image_gen.core.contracts import RenderArtifact, SceneTask
 from image_gen.core.logger import get_logger
 
+import os
+
+def to_web_path(full_path: str) -> str:
+    # normalize slashes
+    full_path = full_path.replace("\\", "/")
+
+    # keep only path after project folder
+    if "image_gen/outputs" in full_path:
+        return full_path.split("image_gen/outputs")[-1].lstrip("/")
+    return full_path
+
 logger = get_logger(__name__)
 
 
@@ -28,7 +39,7 @@ class SceneImageGenerator:
             )
             return RenderArtifact(
                 panel_id=scene.panel_id,
-                output_path=execution.output_path,
+                output_path=to_web_path(execution.output_path),
                 model_used=execution.model_used,
                 prompt=prompt_package.positive_prompt,
                 fallback_used=execution.fallback_used,
