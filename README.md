@@ -1,4 +1,5 @@
 <div align="center">
+<img src="assets\landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
 
 # 🎨 AiToon  
 ### *AI-Powered Comic Story Generation Platform*
@@ -15,9 +16,6 @@
   <b>Transform stories into fully illustrated comic panels using AI</b>
 </p>
 
-<br>
-
-<img src="assets\landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
 
 <br><br>
 
