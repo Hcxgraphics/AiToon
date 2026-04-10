@@ -118,6 +118,10 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(222 14% 28%);
   }
+  
+  .bg-canvas {
+    background: linear-gradient(135deg, hsl(222 20% 7%) 0%, hsl(0 0% 10%) 100%);
+  }
 
   /* Mouse scroll button animation */
   .mouse-btn {

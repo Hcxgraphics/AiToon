@@ -21,7 +21,7 @@ export const SetupPage = () => {
     tagline: "",
     summary: ""
   });
-  const [loading, setLoading] = useState(false); // ✅ LOADING STATE
+  const [loading, setLoading] = useState(false);
 
   const canProceed = () => {
     if (currentStep === 1) return !!selectedTheme;
@@ -47,9 +47,7 @@ export const SetupPage = () => {
     }
 
     try {
-      setLoading(true); // ✅ START LOADER
-
-      console.log("🚀 Creating project...");
+      setLoading(true);
 
       // STEP 1: CREATE PROJECT
       const setupRes = await fetch("http://localhost:8000/setup", {
@@ -66,62 +64,64 @@ export const SetupPage = () => {
         })
       });
 
-      if (!setupRes.ok) {
-        throw new Error("❌ Failed to create project");
-      }
+      if (!setupRes.ok) throw new Error("Failed to create project");
 
       const setupData = await setupRes.json();
 
-      console.log("✅ Project created:", setupData);
-
-      console.log("⚡ Generating comic using AI...");
-
-      // STEP 2: GENERATE
-      const generateBody = {
-        project_id: setupData.project_id,
-        storyline: storyData.storyline,
-        summary: storyData.summary || "",
-        theme: selectedTheme?.name || selectedTheme,
-        characters: (selectedCharacters || []).map((c) =>
-          typeof c === "string"
-            ? { name: c }
-            : {
-                name: c.name,
-                personality: c.personality || "",
-                style: c.style || "",
-                appearance: c.appearance || ""
-              }
-        )
-      };
-
-      console.log("📤 GENERATE REQUEST:", generateBody);
-
+      // STEP 2: GENERATE COMIC
       const genRes = await fetch("http://localhost:8000/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(generateBody)
+        body: JSON.stringify({
+          project_id: setupData.project_id,
+          storyline: storyData.storyline,
+          summary: storyData.summary || "",
+          theme: selectedTheme?.name || selectedTheme,
+          characters: (selectedCharacters || []).map((c) =>
+            typeof c === "string"
+              ? { name: c }
+              : {
+                  name: c.name,
+                  personality: c.personality || "",
+                  style: c.style || "",
+                  appearance: c.appearance || ""
+                }
+          )
+        })
       });
 
-      if (!genRes.ok) {
-        const errText = await genRes.text();
-        console.error("❌ Generate failed:", errText);
-        throw new Error("AI generation failed");
-      }
+      if (!genRes.ok) throw new Error("AI generation failed");
 
       const genData = await genRes.json();
 
       console.log("🔥 AI OUTPUT:", genData);
 
-      // STEP 3: REDIRECT
+      // ✅ STEP 3: BUILD IMAGE MAP (FIX: numeric keys)
+      const images = {};
+
+      genData.image_generation.forEach((p) => {
+        images[p.panel_id] =
+          `http://localhost:8000/image_gen/outputs/${p.output_path}`;
+      });
+
+      console.log("🖼️ IMAGE MAP:", images);
+
+      // ✅ STEP 4: STORE IN LOCAL STORAGE (numeric keys matching panel.id)
+      localStorage.setItem(
+        "generatedImages",
+        JSON.stringify(images)
+      );
+
+      // STEP 5: REDIRECT TO EDITOR
       router.push(`/editor/${setupData.project_id}`);
 
     } catch (err) {
-      console.error("🚨 ERROR:", err);
-      alert("Something went wrong during comic generation!");
+      console.error("ERROR:", err);
+      alert("Something went wrong!");
     } finally {
-      setLoading(false); // ✅ STOP LOADER
+      setLoading(false);
     }
   };
 
@@ -164,16 +164,10 @@ export const SetupPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
 
-      {/* ✅ LOADER OVERLAY */}
       {loading && <Loader />}
 
-      {/* Header */}
       <div className="pt-10 pb-6 text-center">
-        <motion.h1
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-bold text-foreground tracking-tight"
-        >
+        <motion.h1 className="text-3xl font-bold">
           Create Your Comic
         </motion.h1>
 
@@ -182,17 +176,9 @@ export const SetupPage = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 px-6 md:px-12 lg:px-20 pb-4 overflow-y-auto">
+      <div className="flex-1 px-6 pb-4 overflow-y-auto">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-4xl mx-auto"
-          >
+          <motion.div key={currentStep}>
             <div className="text-center mb-8">
               <h2 className="text-xl font-semibold">
                 {current.title}
@@ -207,8 +193,7 @@ export const SetupPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Footer */}
-      <div className="px-6 md:px-12 lg:px-20 pb-8">
+      <div className="px-6 pb-8">
         <NavigationControls
           currentStep={currentStep}
           onBack={handleBack}
