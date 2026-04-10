@@ -5,26 +5,17 @@ from pydantic import BaseModel
 import os
 from groq import Groq
 from orchestrator.logger import get_logger
-from config.db import get_db
-from services.ai_service import run_orchestrator
 
 router = APIRouter()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+groq_api_key = os.getenv("GROQ_API_KEY")
+client = Groq(api_key=groq_api_key) if groq_api_key else None
 logger = get_logger("routes.ai")
 
 class SuggestRequest(BaseModel):
     type: str   # storyline / tagline / summary
     context: str
     characters: Optional[List[str]] = [] 
-
-
-class GenerateRequest(BaseModel):
-    project_id: str
-    storyline: str
-    summary: Optional[str] = ""
-    characters: Optional[List[dict]] = []
-    theme: Optional[str] = None  
 
 def format_characters(chars):
     if not chars:
@@ -47,6 +38,8 @@ def format_characters(chars):
 
 @router.post("/ai/suggest")
 def suggest(data: SuggestRequest):
+    if client is None:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY is not configured on the server.")
     
     char_context = format_characters(data.characters)
 
@@ -90,42 +83,3 @@ Return only the {data.type}.
     return {
         "suggestion": response.choices[0].message.content
     }
-
-@router.post("/generate")
-def generate(data: GenerateRequest):
-    try:
-        db = get_db()
-
-        prompt = f"""
-        Storyline: {data.storyline}
-        Summary: {data.summary}
-        """
-
-        result = run_orchestrator(prompt , data.theme)
-
-        final_output = result["final_output"]
-        debug_data = result.get("debug", {})
-
-        db.projects.update_one(
-            {"_id": data.project_id},
-            {
-                "$set": {
-                    "panels": final_output["panels"],
-                    "characters": final_output["characters"],
-                    "debug": debug_data
-                }
-            }
-        )
-
-        return {
-            "final_output": result["final_output"],
-            "debug": {
-                "scene_data": result.get("scene_data"),
-                "character_data": result.get("character_data"),
-                "dialogue_data": result.get("dialogue_data"),
-            },
-        }
-
-    except Exception as exc:
-        logger.error("Orchestrator generation failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))

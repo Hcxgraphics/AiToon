@@ -8,7 +8,7 @@ SERVER_ROOT = Path(__file__).resolve().parents[1]
 if str(SERVER_ROOT) not in sys.path:
     sys.path.insert(0, str(SERVER_ROOT))
 
-from services.ai_service import run_orchestrator
+from services.ai_service import generate_comic_package
 
 
 DEFAULT_PROMPT = 'A pink hair cute girl found a unicorn on an island named "Kolinda".'
@@ -21,7 +21,7 @@ def main() -> None:
     parser.add_argument("--theme", default=DEFAULT_THEME, help="Theme to send to the orchestrator.")
     args = parser.parse_args()
 
-    result = run_orchestrator(args.prompt, args.theme , user_id="test_user")
+    result = generate_comic_package(args.prompt, args.theme, user_id="test_user")
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 

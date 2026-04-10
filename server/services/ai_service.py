@@ -1,24 +1,15 @@
-from orchestrator.core.graph import run_pipeline
-from orchestrator.logger import get_logger
+from services.workflows import StarterWorkflowService
 
-
-DEFAULT_BUBBLE_TYPES = ["Speech: oval", "Speech: rectangle", "Thought (Cloud like)" , "Whisper (Dashed or faint outline)", "Shout(Jagged / spiky)", "Robot Electronic (Zigzag or geometric)"]
-
-logger = get_logger("services.ai_service")
+_starter_workflow_service = StarterWorkflowService()
 
 
 def run_orchestrator(prompt, theme, user_id="test_user"):
-    selected_theme = theme or "Anime"
-    logger.info("Running orchestrator for theme=%s", selected_theme)
+    return _starter_workflow_service.run_orchestrator(prompt=prompt, theme=theme, user_id=user_id)
 
-    def constraints_provider():
-        return {
-            "themes": [selected_theme],
-            "bubble_types": DEFAULT_BUBBLE_TYPES,
-        }
 
-    return run_pipeline(
-        user_input=prompt,
-        constraints_provider=constraints_provider,
+def generate_comic_package(prompt, theme, user_id="test_user"):
+    return _starter_workflow_service.create_package_from_prompt(
+        prompt=prompt,
+        theme=theme,
         user_id=user_id,
     )

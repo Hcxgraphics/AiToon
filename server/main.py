@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import setup, project
 from config.db import get_db
-from routes import ai
+from routes import ai, editor, generate
 
 
 app = FastAPI()
@@ -18,6 +18,8 @@ app.add_middleware(
 app.include_router(setup.router)
 app.include_router(project.router)
 app.include_router(ai.router)
+app.include_router(generate.router)
+app.include_router(editor.router)
 
 @app.get("/")
 def root():
