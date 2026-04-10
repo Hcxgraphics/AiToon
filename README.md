@@ -1,5 +1,4 @@
 <div align="center">
-<img src="assets\landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
 
 # 🎨 AiToon  
 ### *AI-Powered Comic Story Generation Platform*
@@ -12,12 +11,11 @@
   <img src="https://img.shields.io/badge/Database-MongoDB-green?style=for-the-badge&logo=mongodb" />
 </p>
 
+<img src="assets\landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
+<br>
 <p align="center">
-  <b>Transform stories into fully illustrated comic panels using AI</b>
+  <b>Transform your stories into fully illustrated comic panels using AI</b>
 </p>
-
-
-<br><br>
 
 <p align="center">
   <a href="#-features">Features</a> •
