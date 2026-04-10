@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 CURRENT_FILE = Path(__file__).resolve()
 APP_ROOT = CURRENT_FILE.parents[3]
@@ -45,23 +45,30 @@ class ImageGenerationService:
         *,
         panel_id: int,
         prompt: str,
-        image_url: str | None = None,
-        mask_url: str | None = None,
+        preferred_model: Optional[str] = None,
+        negative_prompt: str = "",
+        width: int = 1024,
+        height: int = 1024,
+        seed: int = 42,
     ) -> Dict[str, Any]:
         output_path = APP_ROOT / "image_gen" / "outputs" / "panels" / f"panel_{panel_id}.png"
-        saved_path = self.retry_router.inpaint_panel(
+        execution = self.retry_router.regenerate_with_retry(
+            panel_id=panel_id,
             prompt=prompt,
             output_path=str(output_path),
-            image_url=image_url,
-            mask_url=mask_url,
+            preferred_model=preferred_model,
+            negative_prompt=negative_prompt,
+            width=width,
+            height=height,
+            seed=seed,
         )
         return {
             "panel_id": panel_id,
-            "output_path": saved_path,
-            "model_used": "inpainting",
+            "output_path": execution.output_path,
+            "model_used": execution.model_used,
             "prompt": prompt,
-            "fallback_used": False,
-            "attempts": 1,
+            "fallback_used": execution.fallback_used,
+            "attempts": execution.attempts,
             "success": True,
             "error_message": None,
         }

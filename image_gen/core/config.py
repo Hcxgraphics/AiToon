@@ -47,7 +47,6 @@ class BatchConfig:
 PIXAZO_API_KEY = os.getenv("AITOON_PIXAZO_API_KEY", "")
 DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "flux")
 FALLBACK_MODEL = os.getenv("FALLBACK_MODEL", "sdxl")
-ENABLE_INPAINTING = os.getenv("ENABLE_INPAINTING", "True").lower() == "true"
 DEFAULT_IMAGE_SIZE: Tuple[int, int] = (
     int(os.getenv("AITOON_DEFAULT_WIDTH", "1024")),
     int(os.getenv("AITOON_DEFAULT_HEIGHT", "1024")),

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from io import BytesIO
-from pathlib import Path
 from typing import Optional
 
 import requests
@@ -9,8 +8,6 @@ from PIL import Image, UnidentifiedImageError
 
 from image_gen.core.config import (
     BATCH_CONFIG,
-    ENABLE_INPAINTING,
-    OUTPUT_DIR,
     get_model_config,
     get_request_headers,
     normalize_model_name,
@@ -18,14 +15,12 @@ from image_gen.core.config import (
 from image_gen.core.logger import get_logger
 
 logger = get_logger(__name__)
-INPAINTING_URL = "https://gateway.pixazo.ai/inpainting/v1/getImageStream"
 
 
 def extract_image_url(model_name: str, response_json: dict) -> str:
     key_map = {
         "sdxl": "imageUrl",
         "flux": "output",
-        "inpainting": "imageUrl",
     }
     normalized_model = normalize_model_name(model_name)
     response_key = key_map[normalized_model]
@@ -74,44 +69,6 @@ class PixazoClient:
         )
         image = self._parse_response_image(response=response, model_name=normalized_model)
         return image
-
-    def inpaint_image(
-        self,
-        prompt: str,
-        image_url: str | None = None,
-        mask_url: str | None = None,
-    ) -> Image.Image:
-        if not ENABLE_INPAINTING:
-            raise RuntimeError("Inpainting is disabled for the image pipeline.")
-
-        payload = {"prompt": prompt}
-        if image_url and mask_url:
-            payload["imageUrl"] = image_url
-            payload["maskUrl"] = mask_url
-
-        logger.info("Submitting Pixazo inpainting request")
-        response = self.session.post(
-            INPAINTING_URL,
-            headers=get_request_headers(),
-            json=payload,
-            timeout=BATCH_CONFIG.request_timeout_seconds,
-        )
-        return self._parse_response_image(response=response, model_name="inpainting")
-
-    def save_inpainted_image(
-        self,
-        prompt: str,
-        output_path: str | Path,
-        image_url: str | None = None,
-        mask_url: str | None = None,
-    ) -> str:
-        image = self.inpaint_image(prompt=prompt, image_url=image_url, mask_url=mask_url)
-        destination = Path(output_path)
-        if not destination.is_absolute():
-            destination = OUTPUT_DIR / destination
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        image.save(destination)
-        return str(destination)
 
     def _parse_response_image(self, response: requests.Response, model_name: str) -> Image.Image:
         response.raise_for_status()

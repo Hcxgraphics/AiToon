@@ -22,8 +22,7 @@ class EditorGenerateRequest(BaseModel):
 class RegeneratePanelRequest(BaseModel):
     panel_id: int
     prompt: str
-    image_url: Optional[str] = None
-    mask_url: Optional[str] = None
+    model_used: Optional[str] = None
     project_id: Optional[str] = None
 
 
