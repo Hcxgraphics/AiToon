@@ -8,6 +8,7 @@ import { NavigationControls } from "./NavigationControls";
 import { ThemeCarousel } from "./ThemeCarousel";
 import { CharacterLibrary } from "./CharacterLibrary";
 import { StoryForm } from "./StoryForm";
+import Loader from "../ui/Loader";
 
 export const SetupPage = () => {
   const router = useRouter();
@@ -20,7 +21,7 @@ export const SetupPage = () => {
     tagline: "",
     summary: ""
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ LOADING STATE
 
   const canProceed = () => {
     if (currentStep === 1) return !!selectedTheme;
@@ -39,93 +40,90 @@ export const SetupPage = () => {
     if (currentStep < 3) setCurrentStep((s) => s + 1);
   };
 
-  // FIXED FUNCTION
- const handleCreateComic = async () => {
-  if (!storyData.storyline) {
-    alert("Please enter storyline");
-    return;
-  }
+  const handleCreateComic = async () => {
+    if (!storyData.storyline) {
+      alert("Please enter storyline");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true); // ✅ START LOADER
 
-    console.log("🚀 Creating project...");
+      console.log("🚀 Creating project...");
 
-    // ✅ STEP 1: CREATE PROJECT
-    const setupRes = await fetch("http://localhost:8000/setup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        theme: selectedTheme?.name || selectedTheme,
-        characters: selectedCharacters || [],
+      // STEP 1: CREATE PROJECT
+      const setupRes = await fetch("http://localhost:8000/setup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          theme: selectedTheme?.name || selectedTheme,
+          characters: selectedCharacters || [],
+          storyline: storyData.storyline,
+          tagline: storyData.tagline,
+          summary: storyData.summary
+        })
+      });
+
+      if (!setupRes.ok) {
+        throw new Error("❌ Failed to create project");
+      }
+
+      const setupData = await setupRes.json();
+
+      console.log("✅ Project created:", setupData);
+
+      console.log("⚡ Generating comic using AI...");
+
+      // STEP 2: GENERATE
+      const generateBody = {
+        project_id: setupData.project_id,
         storyline: storyData.storyline,
-        tagline: storyData.tagline,
-        summary: storyData.summary
-      })
-    });
+        summary: storyData.summary || "",
+        theme: selectedTheme?.name || selectedTheme,
+        characters: (selectedCharacters || []).map((c) =>
+          typeof c === "string"
+            ? { name: c }
+            : {
+                name: c.name,
+                personality: c.personality || "",
+                style: c.style || "",
+                appearance: c.appearance || ""
+              }
+        )
+      };
 
-    if (!setupRes.ok) {
-      throw new Error("❌ Failed to create project");
+      console.log("📤 GENERATE REQUEST:", generateBody);
+
+      const genRes = await fetch("http://localhost:8000/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(generateBody)
+      });
+
+      if (!genRes.ok) {
+        const errText = await genRes.text();
+        console.error("❌ Generate failed:", errText);
+        throw new Error("AI generation failed");
+      }
+
+      const genData = await genRes.json();
+
+      console.log("🔥 AI OUTPUT:", genData);
+
+      // STEP 3: REDIRECT
+      router.push(`/editor/${setupData.project_id}`);
+
+    } catch (err) {
+      console.error("🚨 ERROR:", err);
+      alert("Something went wrong during comic generation!");
+    } finally {
+      setLoading(false); // ✅ STOP LOADER
     }
-
-    const setupData = await setupRes.json();
-
-    console.log("✅ Project created:", setupData);
-
-    // 🔥 USER FEEDBACK
-    console.log("⚡ Generating comic using AI...");
-
-    // ✅ STEP 2: CALL ORCHESTRATOR
-    const generateBody = {
-      project_id: setupData.project_id,
-      storyline: storyData.storyline,
-      summary: storyData.summary || "",
-      theme: selectedTheme?.name || selectedTheme ,
-      characters: (selectedCharacters || []).map((c) =>
-        typeof c === "string"
-          ? { name: c } // fallback if ID
-          : {
-              name: c.name,
-              personality: c.personality || "",
-              style: c.style || "",
-              appearance: c.appearance || ""
-            }
-      )
-    };
-
-    console.log("📤 GENERATE REQUEST:", generateBody);
-
-    const genRes = await fetch("http://localhost:8000/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(generateBody)
-
-    });
-
-    if (!genRes.ok) {
-      const errText = await genRes.text();
-      console.error("❌ Generate failed:", errText);
-      throw new Error("AI generation failed");
-    }
-
-    const genData = await genRes.json();
-
-    console.log("🔥 AI OUTPUT:", genData);
-
-    // ✅ STEP 3: REDIRECT AFTER SUCCESS
-    router.push(`/editor/${setupData.project_id}`);
-
-  } catch (err) {
-    console.error("🚨 ERROR:", err);
-    alert("Something went wrong during comic generation!");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const stepContent = {
     1: {
@@ -155,7 +153,7 @@ export const SetupPage = () => {
         <StoryForm
           storyData={storyData}
           onUpdateStory={setStoryData}
-          selectedCharacters={selectedCharacters} // ✅ IMPORTANT
+          selectedCharacters={selectedCharacters}
         />
       )
     }
@@ -165,6 +163,10 @@ export const SetupPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+
+      {/* ✅ LOADER OVERLAY */}
+      {loading && <Loader />}
+
       {/* Header */}
       <div className="pt-10 pb-6 text-center">
         <motion.h1
@@ -214,7 +216,7 @@ export const SetupPage = () => {
           onSkip={handleSkip}
           canProceed={canProceed()}
           onCreateComic={handleCreateComic}
-          loading={loading} // optional if you use spinner
+          loading={loading}
         />
       </div>
     </div>
