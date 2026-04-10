@@ -28,8 +28,11 @@ class APIModelConfig:
     endpoint: str
     quality_tier: str
     intended_use: str
+    default_width: int
+    default_height: int
     default_steps: int
     default_guidance_scale: float
+    default_seed: int = 42
 
 
 @dataclass(frozen=True)
@@ -42,7 +45,9 @@ class BatchConfig:
 
 
 PIXAZO_API_KEY = os.getenv("AITOON_PIXAZO_API_KEY", "")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "lightning")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "flux")
+FALLBACK_MODEL = os.getenv("FALLBACK_MODEL", "sdxl")
+ENABLE_INPAINTING = os.getenv("ENABLE_INPAINTING", "True").lower() == "true"
 DEFAULT_IMAGE_SIZE: Tuple[int, int] = (
     int(os.getenv("AITOON_DEFAULT_WIDTH", "1024")),
     int(os.getenv("AITOON_DEFAULT_HEIGHT", "1024")),
@@ -58,6 +63,8 @@ PIXAZO_MODELS: Dict[str, APIModelConfig] = {
         endpoint="https://gateway.pixazo.ai/flux-1-schnell/v1/getData",
         quality_tier="draft",
         intended_use="Fast storyboard drafts and low-complexity preview scenes.",
+        default_width=1024,
+        default_height=1024,
         default_steps=8,
         default_guidance_scale=3.5,
     ),
@@ -66,30 +73,21 @@ PIXAZO_MODELS: Dict[str, APIModelConfig] = {
         endpoint="https://gateway.pixazo.ai/getImage/v1/getSDXLImage",
         quality_tier="final",
         intended_use="High-quality render path for important and emotional scenes.",
-        default_steps=28,
-        default_guidance_scale=7.0,
-    ),
-    "lightning": APIModelConfig(
-        name="lightning",
-        endpoint="https://gateway.pixazo.ai/sdxl_lightning/getImage/v1/getSDXLImage",
-        quality_tier="refined-fast",
-        intended_use="Fast refined renders for multi-character or medium-complexity scenes.",
+        default_width=768,
+        default_height=768,
         default_steps=12,
-        default_guidance_scale=4.5,
+        default_guidance_scale=4.0,
     ),
 }
 
 MODEL_FALLBACK_ORDER: Dict[str, Tuple[str, ...]] = {
-    "flux": ("lightning", "sdxl"),
-    "lightning": ("sdxl", "flux"),
-    "sdxl": ("lightning", "flux"),
+    "flux": ("sdxl",),
+    "sdxl": ("flux",),
 }
 
 MODEL_ALIASES: Dict[str, str] = {
     "flux": "flux",
     "flux-schnell": "flux",
-    "lightning": "lightning",
-    "sdxl-lightning": "lightning",
     "sdxl": "sdxl",
     "sdxl-base": "sdxl",
 }
@@ -132,6 +130,10 @@ def get_model_fallbacks(model_name: str) -> Tuple[str, ...]:
 
 def get_default_model() -> str:
     return normalize_model_name(DEFAULT_MODEL)
+
+
+def get_fallback_model() -> str:
+    return normalize_model_name(FALLBACK_MODEL)
 
 
 def has_pixazo_api_key() -> bool:

@@ -88,3 +88,18 @@ class RetryFallbackRouter:
         raise RuntimeError(
             f"Unable to render panel {scene_task.panel_id} after retries and fallbacks: {last_error}"
         )
+
+    def inpaint_panel(
+        self,
+        prompt: str,
+        output_path: str,
+        image_url: str | None = None,
+        mask_url: str | None = None,
+    ) -> str:
+        logger.info("Submitting inpainting request for output=%s", output_path)
+        return self.client.save_inpainted_image(
+            prompt=prompt,
+            output_path=output_path,
+            image_url=image_url,
+            mask_url=mask_url,
+        )
