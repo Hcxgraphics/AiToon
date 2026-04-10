@@ -17,7 +17,7 @@
 
 <br>
 
-<img src="./assets/readme/landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
+<img src="assets\landing-ui.png" width="100%" alt="AiToon Landing Page UI"/>
 
 <br><br>
 
@@ -69,7 +69,7 @@ AI Image Generation Engine
 # 🎨 Main Dashboard / Editor UI
 
 <p align="center">
-  <img src="./assets/readme/editor-dashboard.png" width="100%" alt="AiToon Editor Dashboard"/>
+  <img src="assets\editor-dashboard.png" width="100%" alt="AiToon Editor Dashboard"/>
 </p>
 
 ---
