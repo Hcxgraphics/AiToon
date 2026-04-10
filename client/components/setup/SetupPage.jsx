@@ -82,6 +82,7 @@ export const SetupPage = () => {
       project_id: setupData.project_id,
       storyline: storyData.storyline,
       summary: storyData.summary || "",
+      theme: selectedTheme?.name || selectedTheme ,
       characters: (selectedCharacters || []).map((c) =>
         typeof c === "string"
           ? { name: c } // fallback if ID
@@ -102,6 +103,7 @@ export const SetupPage = () => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(generateBody)
+
     });
 
     if (!genRes.ok) {
